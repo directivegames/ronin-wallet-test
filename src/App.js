@@ -1,17 +1,18 @@
 import './App.css'
 import Button from '@mui/material/Button'
-import { useAccount, useConnect, useDisconnect } from "wagmi"
+import { useAccount, useConnect, useDisconnect, useChainId } from "wagmi"
 import { useMemo, useState } from "react"
 import { createConfig, http, WagmiProvider } from "wagmi"
-import { saigon } from "wagmi/chains"
+import { ronin, saigon } from "wagmi/chains"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 //=======================================================================================================================
 
 const config = createConfig({
-  chains: [saigon],
+  chains: [ronin, saigon],
   transports: {
-    [saigon.id]: http(),
+    [ronin.id]: http(),
+    [saigon.id]: http(),    
   },
 })
 
@@ -43,7 +44,11 @@ function Component() {
   return (
     <div>
       <pre className="Json">
-        <code>{ JSON.stringify({ isConnected, address }, null, 4) }</code>
+        <code>{ JSON.stringify({ 
+          isConnected,           
+          chainId: useChainId(),
+          address,
+        }, null, 4) }</code>
       </pre><br/>
       <Button variant='contained' onClick={ toggleConnection } disabled={ isConnecting }>{ isConnected ? "Disconnect" : "Connect" }</Button>            
     </div>

@@ -74,31 +74,23 @@ function App() {
     setComponentIndex((componentIndex + 1) % 2)
   }
 
-  if (componentIndex === 0) {
-    return (
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <div className="App">
-          <header className="App-header">
-            <Component/>
-            <br/><br/>
-            <Button variant='contained' onClick={ toggleComponent }>{ "Toggle Component" }</Button>
-          </header>
-        </div>
-        </QueryClientProvider>      
-      </WagmiProvider>    
-    )
-  } else {
-    return (
-      <div className="App">
-          <header className="App-header">
-            <Component2/>
-            <br/><br/>
-            <Button variant='contained' onClick={ toggleComponent }>{ "Toggle Component" }</Button>
-          </header>
-      </div>
-    )
+  function ComponentSwitcher() {
+    return componentIndex === 0 ? <Component/> : <Component2/>
   }
+  
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <div className="App">
+        <header className="App-header">
+          <ComponentSwitcher/>
+          <br/><br/>
+          <Button variant='contained' onClick={ toggleComponent }>{ "Toggle Component" }</Button>
+        </header>
+      </div>
+      </QueryClientProvider>      
+    </WagmiProvider>    
+  )
 }
 
 export default App

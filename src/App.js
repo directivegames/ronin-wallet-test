@@ -44,7 +44,7 @@ function WalletComponent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectors, useRoninWallet.current]
   )
-  
+
   async function toggleConnection () {
     setIsConnecting(true)
     if (isConnected) {
@@ -92,7 +92,7 @@ function OtherComponent() {
 function App() {
   const [ componentIndex, setComponentIndex ] = useState(0)
   
-  async function toggleComponent () {
+  async function switchComponent () {
     setComponentIndex((componentIndex + 1) % 2)
   }
 
@@ -107,7 +107,7 @@ function App() {
         <header className="App-header">
           <ComponentSwitcher/>
           <br/><br/>
-          <Button variant='contained' onClick={ toggleComponent }>{ "Toggle Component" }</Button>
+          <Button variant='contained' onClick={ switchComponent }>{ "Switch Component" }</Button>
         </header>
       </div>
       </QueryClientProvider>      

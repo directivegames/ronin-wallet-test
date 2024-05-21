@@ -1,18 +1,21 @@
 import './App.css'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
+import Typography from "@mui/material/Typography"
 import { useAccount, useConnect, useDisconnect, useChainId } from "wagmi"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect, useRef, useReducer } from "react"
 import { createConfig, http, WagmiProvider } from "wagmi"
-import { ronin, saigon } from "wagmi/chains"
+import { ronin, saigon, mainnet } from "wagmi/chains"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 //=======================================================================================================================
 
 const config = createConfig({
-  chains: [ronin, saigon],
+  chains: [ronin, saigon, mainnet],
   transports: {
     [ronin.id]: http(),
-    [saigon.id]: http(),    
+    [saigon.id]: http(),
+    [mainnet.id]: http(),
   },
 })
 
@@ -20,17 +23,28 @@ const queryClient = new QueryClient()
 
 //=======================================================================================================================
 
-function Component() {
-  const [ isConnecting, setIsConnecting ] = useState(false)  
+function WalletComponent() {
+  const stateName = 'WalletComponent'
+  const localState = JSON.parse(localStorage.getItem(stateName) ?? '{}')    
+  
+  const [ isConnecting, setIsConnecting ] = useState(false)
+  const useRoninWallet = useRef(Boolean(localState.useRoninWallet ?? true))
   const { isConnected, address } = useAccount()
   const { connectors, connectAsync } = useConnect()
   const { disconnectAsync } = useDisconnect()
 
-  const connector = useMemo(
-    () => connectors.find((connector) => connector.name === "Ronin Wallet"),
-    [connectors]
-  )
+  const [, forceUpdate] = useReducer(x => x + 1, 0)
 
+  useEffect(() => {
+    localStorage.setItem(stateName, JSON.stringify({ useRoninWallet: useRoninWallet.current }))
+  })
+
+  const connector = useMemo(
+    () => connectors.find((connector) => ((connector.name === "Ronin Wallet") === useRoninWallet.current)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [connectors, useRoninWallet.current]
+  )
+  
   async function toggleConnection () {
     setIsConnecting(true)
     if (isConnected) {
@@ -41,10 +55,18 @@ function Component() {
     setIsConnecting(false)
   }
 
+  const handleCheckBox = (event) => {
+    useRoninWallet.current = event.target.checked
+    forceUpdate()
+  }
+
   return (
     <div>
-      <pre className="Json">
+      <Typography variant="p5">Use Ronin Wallet?</Typography>
+      <Checkbox checked={ Boolean(useRoninWallet.current) } onChange={ handleCheckBox } />
+      <pre className="Json">        
         <code>{ JSON.stringify({ 
+          wallet: connector?.name,
           isConnected,           
           chainId: useChainId(),
           address,
@@ -57,7 +79,7 @@ function Component() {
 
 //=======================================================================================================================
 
-function Component2() {
+function OtherComponent() {
   return (
     <div>
       <p>This is another component</p>      
@@ -75,7 +97,7 @@ function App() {
   }
 
   function ComponentSwitcher() {
-    return componentIndex === 0 ? <Component/> : <Component2/>
+    return componentIndex === 0 ? <WalletComponent/> : <OtherComponent/>
   }
   
   return (
